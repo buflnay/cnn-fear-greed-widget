@@ -1,93 +1,587 @@
+
 <!doctype html>
 <html lang="ko">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<meta name="referrer" content="no-referrer" />
-<title>CNN Fear & Greed · 개인용 노션 위젯</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Fear & Greed Index | CNN 비공식 위젯</title>
+
 <style>
-:root{color-scheme:light;--ink:#242628;--muted:#77808b;--line:#e9eaed;--bg:#ffffff}
-*{box-sizing:border-box}
-html,body{margin:0;background:transparent;color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-main{max-width:800px;margin:auto;background:var(--bg);border:1px solid #e7e9ec;border-radius:18px;padding:18px 22px;box-shadow:0 2px 12px rgba(24,34,49,.03)}
-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-h1{font-size:17px;line-height:1.35;margin:0;font-weight:720;letter-spacing:-.35px}.description{font-size:11px;color:var(--muted);margin:4px 0 0}
-.small{font-size:10px;color:#8c939c} .status{font-size:10px;color:#69717b;border:1px solid #e8e9ef;border-radius:100px;padding:5px 9px;white-space:nowrap}
-.content{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(180px,.8fr);gap:8px 16px;align-items:center;margin-top:10px}
-.gauge{position:relative;min-width:0;aspect-ratio:440/295}.gauge svg{height:100%;width:100%;overflow:visible}
-#needle{transition:transform .7s cubic-bezier(.22,.8,.28,1);transform-origin:220px 238px}
-.gauge-center{position:absolute;top:67%;left:50%;transform:translate(-50%,-15%);text-align:center;white-space:nowrap}
-.score{font-size:34px;line-height:1.02;font-weight:800;font-variant-numeric:tabular-nums;color:#1f2937}
-.rating{font-size:12px;margin-top:4px;font-weight:650;letter-spacing:-.15px}
-.recent{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px 10px;padding:9px 0;border-bottom:1px solid var(--line)}
-.recent:last-child{border-bottom:none}.rec-label{font-size:11px;color:var(--muted)}.rec-score{font-size:16px;font-weight:750;font-variant-numeric:tabular-nums}
-.date{font-size:10px;color:var(--muted);margin-top:10px}footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:12px;border-top:1px solid #f0f1f3;margin-top:7px}
-a{font-size:11px;color:#667080;text-decoration:none}a:hover{text-decoration:underline}.warning{font-size:10px;color:#a34836;margin-top:7px;display:none}
-@media(max-width:520px){main{padding:13px 12px;border-radius:12px}.content{grid-template-columns:minmax(0,1fr);gap:0}.gauge{max-width:440px;width:100%;margin:0 auto}.recent-list{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.recent{padding:8px 0}.rec-score{font-size:14px} .score{font-size:29px}}
+  :root {
+    color-scheme: light;
+    --ink: #1c2735;
+    --muted: #788392;
+    --stroke: #e8edf2;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html, body {
+    margin: 0;
+    background: transparent;
+    font-family: system-ui, -apple-system, "Apple SD Gothic Neo",
+      "Malgun Gothic", "Noto Sans KR", sans-serif;
+    color: var(--ink);
+  }
+
+  body {
+    padding: 12px;
+  }
+
+  .widget {
+    max-width: 900px;
+    margin: auto;
+    border: 1px solid var(--stroke);
+    border-radius: 19px;
+    padding: 23px 27px 20px;
+    background: #fff;
+    box-shadow: 0 6px 24px rgba(22, 38, 59, .035);
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  h1 {
+    font-size: 19px;
+    font-weight: 780;
+    letter-spacing: -.65px;
+    margin: 0;
+  }
+
+  .subtitle {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: .1px;
+  }
+
+  .status {
+    font-size: 11px;
+    color: #68788b;
+    border: 1px solid #e4eaf1;
+    border-radius: 40px;
+    padding: 7px 11px;
+    white-space: nowrap;
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: minmax(0, 1.63fr) minmax(208px, 1fr);
+    gap: 24px;
+    align-items: center;
+    margin-top: 13px;
+  }
+
+  .gauge {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .gauge svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .seg-label {
+    font-size: 13px;
+    letter-spacing: -.7px;
+    font-weight: 760;
+  }
+
+  .needle {
+    transition: transform .85s cubic-bezier(.19, .8, .28, 1);
+  }
+
+  .tick {
+    fill: #95a0ad;
+    font-size: 12px;
+    font-weight: 510;
+    text-anchor: middle;
+  }
+
+  .score-value {
+    fill: #192736;
+    font-size: 37px;
+    font-weight: 790;
+    letter-spacing: -1.2px;
+    text-anchor: middle;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .score-label {
+    fill: #7e8b97;
+    font-size: 10px;
+    text-anchor: middle;
+  }
+
+  .metrics {
+    width: 100%;
+    padding-top: 5px;
+  }
+
+  .metrics-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #9aa3ae;
+    letter-spacing: .7px;
+    margin: 0 0 8px;
+  }
+
+  .metric {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--stroke);
+    gap: 10px;
+  }
+
+  .metric:last-of-type {
+    border-bottom: 0;
+  }
+
+  .metric span {
+    font-size: 12px;
+    color: #738092;
+  }
+
+  .metric strong {
+    font-size: 18px;
+    font-weight: 760;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .updated {
+    font-size: 10px;
+    color: #8a95a3;
+    line-height: 1.6;
+    margin: 14px 0 0;
+  }
+
+  .warning {
+    font-size: 10px;
+    color: #b15f45;
+    display: none;
+    line-height: 1.5;
+    margin-top: 5px;
+  }
+
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    border-top: 1px solid var(--stroke);
+    padding-top: 14px;
+    margin-top: 2px;
+  }
+
+  .foot span, .foot a {
+    font-size: 10px;
+    color: #8b96a4;
+    text-decoration: none;
+  }
+
+  .foot a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 700px) {
+    .widget {
+      padding: 17px 15px;
+      border-radius: 15px;
+    }
+
+    .content {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+
+    .gauge {
+      max-width: 540px;
+      margin: auto;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .metrics-title, .updated, .warning {
+      grid-column: 1 / -1;
+    }
+
+    .metric {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 10px 2px;
+    }
+
+    .metric span {
+      font-size: 10px;
+    }
+
+    .metric strong {
+      font-size: 15px;
+    }
+  }
+
+  @media (max-width: 400px) {
+    body {
+      padding: 4px;
+    }
+
+    .widget {
+      padding: 14px 10px;
+    }
+
+    .header h1 {
+      font-size: 17px;
+    }
+
+    .status {
+      font-size: 10px;
+    }
+  }
 </style>
 </head>
+
 <body>
-<main aria-label="CNN 공포 탐욕 지수 위젯">
- <header><div><h1>Fear & Greed Index</h1><div class="description">CNN 시장 심리지수 · 비공식 개인용 시각화</div></div><div class="status" id="status">데이터 확인 중</div></header>
- <div class="content">
-  <div class="gauge">
-   <svg viewBox="0 0 440 295" role="img" aria-label="공포 탐욕 0에서 100까지 반원형 게이지">
-    <defs><filter id="shadow"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity=".08" /></filter></defs>
-    <g fill="none" stroke-width="50" stroke-linecap="butt">
-      <path d="M 54 238 A 166 166 0 0 1 87.4 138.2" stroke="#e74c3c"/>
-      <path d="M 95.1 127.6 A 166 166 0 0 1 178.7 77.2" stroke="#f39c12"/>
-      <path d="M 192.6 74.3 A 166 166 0 0 1 247.4 74.3" stroke="#f1c40f"/>
-      <path d="M 261.3 77.2 A 166 166 0 0 1 344.9 127.6" stroke="#8bc34a"/>
-      <path d="M 352.6 138.2 A 166 166 0 0 1 386 238" stroke="#27ae60"/>
-    </g>
-    <g fill="#58636d" font-size="12" font-weight="600" text-anchor="middle">
-      <text x="63" y="112" transform="rotate(-56 63 112)">극도의 공포</text>
-      <text x="138" y="74" transform="rotate(-26 138 74)">공포</text>
-      <text x="220" y="43">중립</text>
-      <text x="302" y="74" transform="rotate(26 302 74)">탐욕</text>
-      <text x="378" y="112" transform="rotate(56 378 112)">극도의 탐욕</text>
-    </g>
-    <path d="M 82 238 A 138 138 0 0 1 358 238" fill="none" stroke="#ffffff" stroke-width="6" opacity=".72"/>
-    <g fill="#88919a" font-size="12" text-anchor="middle"><text x="51" y="258">0</text><text x="127" y="116">25</text><text x="220" y="66">50</text><text x="313" y="116">75</text><text x="390" y="258">100</text></g>
-    <g id="needle" style="transform:rotate(-90deg)">
-     <path d="M 214 237 L 220 98 L 226 237 Z" fill="#2f3542" filter="url(#shadow)"/>
-     <circle cx="220" cy="238" r="11" fill="#2f3542"/>
-     <circle cx="220" cy="238" r="4.5" fill="#ffffff"/>
-   </g>
-   </svg>
-   <div class="gauge-center"><div class="score" id="score">—</div><div class="rating" id="rating">데이터 대기</div></div>
+
+<main class="widget" aria-label="CNN 공포 탐욕 지수 위젯">
+
+  <!-- 상단 제목 -->
+  <header class="header">
+    <div>
+      <h1>Fear &amp; Greed Index</h1>
+      <p class="subtitle">
+        CNN 시장 심리지수 · 비공식 개인용 시각화
+      </p>
+    </div>
+    <span class="status" id="status">데이터 확인 중</span>
+  </header>
+
+  <div class="content">
+
+    <!-- 반원 게이지 -->
+    <div class="gauge">
+
+      <svg viewBox="0 0 520 295"
+           role="img"
+           aria-label="공포부터 탐욕까지 0점에서 100점 사이의 게이지">
+
+        <defs>
+          <filter id="pointerShadow">
+            <feDropShadow
+              dx="0" dy="2" stdDeviation="2"
+              flood-color="#14213c"
+              flood-opacity=".14"/>
+          </filter>
+
+          <filter id="scoreShadow">
+            <feDropShadow
+              dx="0" dy="4" stdDeviation="8"
+              flood-color="#8b98a9"
+              flood-opacity=".12"/>
+          </filter>
+        </defs>
+
+        <!-- 1. 극도의 공포 : 빨강 -->
+        <path
+          d="M 66.09 240.08 A 194 194 0 0 1 99.64 136.82
+             L 140.14 164.39 A 145 145 0 0 0 115.07 241.57 Z"
+          fill="#E5484D"/>
+
+        <g transform="translate(99.75 193.93) rotate(-72)"
+           fill="#FFFFFF" class="seg-label">
+          <text text-anchor="middle" dominant-baseline="middle">
+            <tspan x="0" y="-7">극도의</tspan>
+            <tspan x="0" y="9">공포</tspan>
+          </text>
+        </g>
+
+        <!-- 2. 공포 : 주황 -->
+        <path
+          d="M 106.61 127.23 A 194 194 0 0 1 194.44 63.41
+             L 211.00 109.53 A 145 145 0 0 0 145.35 157.23 Z"
+          fill="#F39B1C"/>
+
+        <g transform="translate(160.96 109.68) rotate(-36)"
+           fill="#FFFFFF" class="seg-label">
+          <text text-anchor="middle"
+                dominant-baseline="middle">공포</text>
+        </g>
+
+        <!-- 3. 중립 : 노랑 -->
+        <path
+          d="M 205.71 59.75 A 194 194 0 0 1 314.29 59.75
+             L 300.58 106.79 A 145 145 0 0 0 219.42 106.79 Z"
+          fill="#F8CC36"/>
+
+        <g transform="translate(260 77.5)"
+           fill="#293241" class="seg-label">
+          <text text-anchor="middle"
+                dominant-baseline="middle">중립</text>
+        </g>
+
+        <!-- 4. 탐욕 : 연초록 -->
+        <path
+          d="M 325.56 63.41 A 194 194 0 0 1 413.39 127.23
+             L 374.65 157.23 A 145 145 0 0 0 309.00 109.53 Z"
+          fill="#89C84B"/>
+
+        <g transform="translate(359.04 109.68) rotate(36)"
+           fill="#293241" class="seg-label">
+          <text text-anchor="middle"
+                dominant-baseline="middle">탐욕</text>
+        </g>
+
+        <!-- 5. 극도의 탐욕 : 초록 -->
+        <path
+          d="M 420.36 136.82 A 194 194 0 0 1 453.91 240.08
+             L 404.93 241.57 A 145 145 0 0 0 379.86 164.39 Z"
+          fill="#21A86B"/>
+
+        <g transform="translate(420.25 193.93) rotate(72)"
+           fill="#FFFFFF" class="seg-label">
+          <text text-anchor="middle" dominant-baseline="middle">
+            <tspan x="0" y="-7">극도의</tspan>
+            <tspan x="0" y="9">탐욕</tspan>
+          </text>
+        </g>
+
+        <!-- 숫자를 각 색상 구간의 중앙 아래에 배치 -->
+        <g class="tick" dominant-baseline="middle">
+          <text x="139.22" y="206.75">0</text>
+          <text x="185.35" y="143.25">25</text>
+          <text x="260.00" y="119.00">50</text>
+          <text x="334.65" y="143.25">75</text>
+          <text x="380.78" y="206.75">100</text>
+        </g>
+
+        <!-- 현재 지수를 가리키는 바늘 -->
+        <g id="needle"
+           class="needle"
+           transform="rotate(-90 260 246)">
+          <path
+            d="M260 115 L254.5 244 Q260 250 265.5 244 Z"
+            fill="#24313d"
+            filter="url(#pointerShadow)"/>
+        </g>
+
+        <!-- 중앙 점수 -->
+        <circle cx="260" cy="229" r="34"
+                fill="#FFFFFF"
+                filter="url(#scoreShadow)"/>
+
+        <text class="score-value"
+              id="score"
+              x="260" y="235">—</text>
+
+        <text class="score-label"
+              id="rating"
+              x="260" y="250">확인 중</text>
+
+      </svg>
+    </div>
+
+    <!-- 이전 지수 비교 -->
+    <section class="metrics" aria-label="과거 지수 비교">
+
+      <p class="metrics-title">HISTORICAL DATA</p>
+
+      <div class="metric">
+        <span>전일 종가</span>
+        <strong id="previous_close">—</strong>
+      </div>
+
+      <div class="metric">
+        <span>1주 전</span>
+        <strong id="previous_1_week">—</strong>
+      </div>
+
+      <div class="metric">
+        <span>1개월 전</span>
+        <strong id="previous_1_month">—</strong>
+      </div>
+
+      <div class="metric">
+        <span>1년 전</span>
+        <strong id="previous_1_year">—</strong>
+      </div>
+
+      <p class="updated" id="updated">
+        최근 데이터 확인 중
+      </p>
+
+      <p class="warning" id="warning">
+        갱신이 지연되고 있을 수 있습니다.
+        CNN 원본에서 확인해 주세요.
+      </p>
+
+    </section>
+
   </div>
-  <div><div class="recent-list">
-    <div class="recent"><div class="rec-label">전일 종가</div><div class="rec-score" id="previous_close">—</div></div>
-    <div class="recent"><div class="rec-label">1주 전</div><div class="rec-score" id="previous_1_week">—</div></div>
-    <div class="recent"><div class="rec-label">1개월 전</div><div class="rec-score" id="previous_1_month">—</div></div>
-    <div class="recent"><div class="rec-label">1년 전</div><div class="rec-score" id="previous_1_year">—</div></div>
-  </div><div class="date" id="updated">갱신 정보가 없습니다.</div><div class="warning" id="warning">데이터 갱신이 지연될 수 있습니다. CNN 원본 수치를 확인하세요.</div></div>
- </div>
- <footer><div class="small">출처: CNN · 공식 위젯 아님</div><a href="https://www.cnn.com/markets/fear-and-greed" target="_blank" rel="noopener noreferrer">CNN 원본에서 확인 ↗</a></footer>
+
+  <!-- 하단 출처 -->
+  <footer class="foot">
+    <span>데이터 출처: CNN · 공식 위젯 아님</span>
+
+    <a href="https://www.cnn.com/markets/fear-and-greed"
+       target="_blank"
+       rel="noopener noreferrer">
+      CNN 원본 보기 ↗
+    </a>
+  </footer>
+
 </main>
+
 <script>
 'use strict';
-const $=id=>document.getElementById(id);
-const labels={"extreme fear":"극도의 공포","fear":"공포","neutral":"중립","greed":"탐욕","extreme greed":"극도의 탐욕"};
-const fmt=x=>typeof x==='number'&&Number.isFinite(x)?Math.round(x).toString():'—';
-(async function(){
- try{
-  const response=await fetch('./data/latest.json?v='+Date.now(),{cache:'no-store'});
-  if(!response.ok)throw new Error('데이터 파일 요청 실패');
-  const v=await response.json();
-  if(typeof v.score!=='number'||!Number.isFinite(v.score)||v.score<0||v.score>100)throw new Error('지수 데이터 미확인');
-  const val=Math.round(v.score);const rating=String(v.rating||'').toLowerCase();
-  $('score').textContent=String(val);$('rating').textContent=labels[rating]||v.rating||'—';
-  $('needle').style.transform='rotate('+(-90+1.8*val)+'deg)';
-  ['previous_close','previous_1_week','previous_1_month','previous_1_year'].forEach(k=>{$(k).textContent=fmt(v[k])});
-  $('status').textContent='CNN 데이터';
-  const timestamp=v.timestamp?new Date(v.timestamp):null;
-  if(timestamp&&!isNaN(timestamp.getTime())){
-    $('updated').textContent='마지막 데이터 시각 · '+new Intl.DateTimeFormat('ko-KR',{timeZone:'Asia/Seoul',dateStyle:'medium',timeStyle:'short'}).format(timestamp);
-    if(Date.now()-timestamp.getTime()>72*3600*1000){$('status').textContent='갱신 지연';$('warning').style.display='block'}
-  }else $('updated').textContent='마지막 갱신 시각 미확인';
- }catch(error){$('status').textContent='연결 대기';$('updated').textContent='CNN 데이터가 아직 준비되지 않았습니다.';console.warn(error)}
+
+// HTML 요소 찾기
+const byId = id => document.getElementById(id);
+
+// CNN 지수 분류 한글 표시
+const labelMap = {
+  'extreme fear': '극도의 공포',
+  'fear': '공포',
+  'neutral': '중립',
+  'greed': '탐욕',
+  'extreme greed': '극도의 탐욕'
+};
+
+// 과거 지수 표시 형식
+const displayNum = x =>
+  typeof x === 'number' && Number.isFinite(x)
+    ? String(Math.round(x))
+    : '—';
+
+// 지수 화면 업데이트
+function show(v, demo = false) {
+
+  if (
+    typeof v.score !== 'number' ||
+    !Number.isFinite(v.score) ||
+    v.score < 0 ||
+    v.score > 100
+  ) {
+    throw new Error('유효하지 않은 지수');
+  }
+
+  const val = Math.round(v.score);
+  const rate = String(v.rating || '').toLowerCase();
+
+  // 현재 점수
+  byId('score').textContent = String(val);
+
+  // 공포/중립/탐욕 문구
+  byId('rating').textContent =
+    labelMap[rate] || v.rating || '지수';
+
+  // 바늘 회전 (0점=-90도, 100점=+90도)
+  byId('needle').setAttribute(
+    'transform',
+    `rotate(${-90 + 1.8 * val} 260 246)`
+  );
+
+  // 과거 지수 갱신
+  [
+    'previous_close',
+    'previous_1_week',
+    'previous_1_month',
+    'previous_1_year'
+  ].forEach(k => {
+    byId(k).textContent = displayNum(v[k]);
+  });
+
+  // 데모 화면 여부
+  byId('status').textContent =
+    demo ? '디자인 미리보기' : 'CNN 데이터';
+
+  if (demo) {
+    byId('updated').textContent =
+      '시연용 수치 · 실제 CNN 데이터가 아닙니다.';
+    return;
+  }
+
+  // 마지막 업데이트 시각
+  const date = v.timestamp ? new Date(v.timestamp) : null;
+
+  if (date && !isNaN(date.getTime())) {
+
+    byId('updated').textContent =
+      '마지막 데이터 시각 · ' +
+      new Intl.DateTimeFormat('ko-KR', {
+        timeZone: 'Asia/Seoul',
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      }).format(date);
+
+    // 72시간 이상 지난 데이터 경고
+    if (Date.now() - date.getTime() > 72 * 3600 * 1000) {
+      byId('status').textContent = '갱신 지연';
+      byId('warning').style.display = 'block';
+    }
+
+  } else {
+    byId('updated').textContent =
+      '최종 업데이트 시각 미확인';
+  }
+}
+
+// CNN 데이터 로드
+(async () => {
+  try {
+
+    // ?demo 옵션은 디자인 확인 전용
+    if (new URLSearchParams(location.search).has('demo')) {
+      show({
+        score: 45,
+        rating: 'fear',
+        previous_close: 38,
+        previous_1_week: 40,
+        previous_1_month: 38,
+        previous_1_year: 49
+      }, true);
+      return;
+    }
+
+    // GitHub Pages에 저장된 CNN 최신 데이터 읽기
+    const response = await fetch(
+      './data/latest.json?v=' + Date.now(),
+      { cache: 'no-store' }
+    );
+
+    if (!response.ok) {
+      throw new Error('데이터 요청 실패');
+    }
+
+    show(await response.json());
+
+  } catch (err) {
+
+    byId('status').textContent = '데이터 대기';
+
+    byId('updated').textContent =
+      'CNN 지수 데이터를 불러올 수 없습니다.';
+
+    console.warn(err);
+  }
 })();
 </script>
-</body></html>
+
+</body>
+</html>
