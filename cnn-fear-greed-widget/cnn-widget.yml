@@ -1,0 +1,35 @@
+name: Update CNN gauge and deploy site
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    # Approximate 07:35 and 19:35 KST; actual start may be delayed by GitHub.
+    - cron: '35 22,10 * * *'
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: cnn-gauge-deployment
+  cancel-in-progress: false
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Fetch latest CNN score
+        run: python3 scripts/update.py
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload page artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
